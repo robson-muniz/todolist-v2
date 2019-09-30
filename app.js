@@ -1,8 +1,7 @@
-//jshint esversion:6
-
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
+
 
 const app = express();
 
@@ -19,33 +18,38 @@ const itemsSchema = {
 
 const Item = mongoose.model("Item", itemsSchema);
 
-const item1 = new Item ({
-  name: "Welcom to your todolist!"
+const item1 = new Item({
+  name:"Welcome to you todo list!"
 });
 
-const item2 = new Item ({
-  name: "Hit the + to add a new item."
+const item2 = new Item({
+  name: "Hit the + button to add a new item."
 });
 
-const item3 = new Item ({
-  name: "<--Hit this to delete an item."
+const item3 = new Item({
+  name: "<-- Hit this to delete an item."
 });
 
 const defaultItems = [item1, item2, item3];
 
-Item.insertMany(defaultItems, function(err){
-  if(err){
-    console.log(err);
-  } else {
-    console.log("Succefully saved default items to DB!");
-  }
-});
 
 app.get("/", function(req, res) {
 
-
-  res.render("list", {listTitle: Today, newListItems: items});
-
+  Item.find({}, function(err, foundItems) {
+    
+    if (foundItems.length === 0) {
+      Item.insertMany(defaultItems, function(err,){
+  if (err) {
+    console.log(err);
+  } else {
+    console.log("Succesfully saved defaultItems to database!")
+  }
+  });
+  res.redirect("/");
+  } else {
+    res.render("list", { listTitle: "Today", newListItems: foundItems });
+  }     
+  });
 });
 
 app.post("/", function(req, res){
@@ -69,6 +73,6 @@ app.get("/about", function(req, res){
   res.render("about");
 });
 
-app.listen(3000, function() {
+app.listen(3000, function(){
   console.log("Server started on port 3000");
 });
